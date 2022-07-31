@@ -177,6 +177,9 @@ int main(int argc, char* argv[])
       { "p", "path" },
       QObject::tr("Existing directory or new file to save to"),
       QStringLiteral("path"));
+    CommandOption labelOption({ "l", "label" },
+                              QObject::tr("Label for TensorFlow CSV"),
+                              QStringLiteral("label"));
     CommandOption clipboardOption(
       { "c", "clipboard" }, QObject::tr("Save the capture to the clipboard"));
     CommandOption pinOption("pin",
@@ -314,7 +317,7 @@ int main(int argc, char* argv[])
                         pinOption,
                         acceptOnSelectOption },
                       guiArgument);
-    parser.AddOptions({ pathOption }, imageArgument);
+    parser.AddOptions({ pathOption, labelOption }, imageArgument);
     parser.AddOptions({ screenNumberOption,
                         clipboardOption,
                         pathOption,
@@ -358,11 +361,16 @@ int main(int argc, char* argv[])
         delete qApp;
         new QApplication(argc, argv);
         QString path = parser.value(pathOption);
+        QString label = parser.value(labelOption);
         if (path.isEmpty()) {
             AbstractLogger::error() << "Invalid path";
             abort();
         }
-        CaptureRequest req(CaptureRequest::IMAGE_MODE, 0, path);
+        if (label.isEmpty()) {
+            AbstractLogger::error() << "Invalid label";
+            abort();
+        }
+        CaptureRequest req(CaptureRequest::IMAGE_MODE, 0, path, label);
         AbstractLogger::info() << path;
         req.addTask(CaptureRequest::COPY);
         req.addTask(CaptureRequest::CSV);

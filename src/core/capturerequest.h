@@ -36,12 +36,19 @@ public:
                    QVariant data = QVariant(),
                    ExportTask tasks = NO_TASK);
 
+    CaptureRequest(CaptureMode mode,
+                   const uint delay,
+                   QVariant image_path,
+                   QVariant label,
+                   ExportTask tasks = NO_TASK);
+
     void setStaticID(uint id);
 
     uint id() const;
     uint delay() const;
     QString path() const;
     QVariant data() const;
+    QString label() const;
     CaptureMode captureMode() const;
     ExportTask tasks() const;
     QRect initialSelection() const;
@@ -58,6 +65,7 @@ private:
     QString m_path;
     ExportTask m_tasks;
     QVariant m_data;
+    QString m_label;
     QRect m_pinWindowGeometry, m_initialSelection;
 
     CaptureRequest() {}

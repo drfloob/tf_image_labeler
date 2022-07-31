@@ -29,6 +29,24 @@ CaptureRequest::CaptureRequest(CaptureRequest::CaptureMode mode,
     }
 }
 
+CaptureRequest::CaptureRequest(CaptureRequest::CaptureMode mode,
+                               const uint delay,
+                               QVariant image_path,
+                               QVariant label,
+                               CaptureRequest::ExportTask tasks)
+  : m_mode(mode)
+  , m_delay(delay)
+  , m_tasks(tasks)
+  , m_data(std::move(image_path))
+  , m_label(label.toString())
+{
+
+    ConfigHandler config;
+    if (config.saveLastRegion()) {
+        setInitialSelection(getLastRegion());
+    }
+}
+
 CaptureRequest::CaptureMode CaptureRequest::captureMode() const
 {
     return m_mode;
@@ -47,6 +65,11 @@ QString CaptureRequest::path() const
 QVariant CaptureRequest::data() const
 {
     return m_data;
+}
+
+QString CaptureRequest::label() const
+{
+    return m_label;
 }
 
 CaptureRequest::ExportTask CaptureRequest::tasks() const

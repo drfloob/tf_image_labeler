@@ -64,6 +64,7 @@ else ()
 endif ()
 
 add_executable(Flameshot::flameshot ALIAS flameshot)
+set_target_properties(flameshot PROPERTIES OUTPUT_NAME "tf_labeler")
 
 if(FLAMESHOT_ICON)
   target_compile_definitions(flameshot PUBLIC FLAMESHOT_ICON="${FLAMESHOT_ICON}")

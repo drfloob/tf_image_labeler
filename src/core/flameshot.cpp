@@ -413,7 +413,7 @@ void Flameshot::exportCapture(QPixmap capture,
         auto csv_coords = m_captureWindow->csv();
         QString csv = QString("UNASSIGNED,%1,%2,%3,%4,,,%5,%6")
                         .arg(req.data().toString())
-                        .arg("label")
+                        .arg(req.label())
                         .arg(csv_coords.left)
                         .arg(csv_coords.top)
                         .arg(csv_coords.right)
