@@ -386,7 +386,7 @@ void CaptureWidget::handleButtonLeftClick(CaptureToolButton* b)
 
 void CaptureWidget::xywhTick()
 {
-    m_xywhDisplay = false;
+    m_xywhDisplay = true;
     repaint();
 }
 
@@ -542,17 +542,27 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
         QRect xybox;
         QFontMetrics fm = painter.fontMetrics();
 
-        QString xy = QString("%1x%2+%3+%4")
+        QString xy = QString("HORK! %1x%2+%3+%4\n(%5%,%6%)->(%7%,%8%) [%9,%10]")
                        .arg(static_cast<int>(selection.width() * scale))
                        .arg(static_cast<int>(selection.height() * scale))
                        .arg(static_cast<int>(selection.left() * scale))
-                       .arg(static_cast<int>(selection.top() * scale));
+                       .arg(static_cast<int>(selection.top() * scale))
+                    //    .arg(selection.left())
+                    //    .arg(selection.top())
+                    //    .arg(selection.right())
+                    //    .arg(selection.bottom())
+                       .arg(selection.left() * 100.0 / painter.window().width())
+                       .arg(selection.top() * 100.0 / painter.window().height())
+                       .arg(selection.right() * 100.0 / painter.window().width())
+                       .arg(selection.bottom() * 100.0 / painter.window().height())
+                       .arg(painter.window().height())
+                       .arg(painter.window().width());
 
         xybox = fm.boundingRect(xy);
         // the small numbers here are just margins so the text doesn't
         // smack right up to the box; they aren't critical and the box
         // size itself is tied to the font metrics
-        xybox.adjust(0, 0, 10, 12);
+        xybox.adjust(0, 0, 26, 26);
         // in anticipation of making the position adjustable
         int x0, y0;
         // Move these to header
