@@ -54,7 +54,8 @@
 
 CaptureWidget::CaptureWidget(const CaptureRequest& req,
                              bool fullScreen,
-                             QWidget* parent)
+                             QWidget* parent,
+                             QPixmap* image)
   : QWidget(parent)
   , m_mouseIsClicked(false)
   , m_captureDone(false)
@@ -107,7 +108,13 @@ CaptureWidget::CaptureWidget(const CaptureRequest& req,
     // Top left of the whole set of screens
     QPoint topLeft(0, 0);
 #endif
-    if (fullScreen) {
+    if (image) {
+        m_context.screenshot = *image;
+        m_context.origScreenshot = m_context.screenshot;
+        setWindowFlags(Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint |
+                       Qt::FramelessWindowHint | Qt::Tool);
+        resize(pixmap().size());
+    } else if (fullScreen) {
         // Grab Screenshot
         bool ok = true;
         m_context.screenshot = ScreenGrabber().grabEntireDesktop(ok);
@@ -555,8 +562,8 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
                        .arg(selection.top() * 100.0 / painter.window().height())
                        .arg(selection.right() * 100.0 / painter.window().width())
                        .arg(selection.bottom() * 100.0 / painter.window().height())
-                       .arg(painter.window().height())
-                       .arg(painter.window().width());
+                       .arg(painter.window().width())
+                       .arg(painter.window().height());
 
         xybox = fm.boundingRect(xy);
         // the small numbers here are just margins so the text doesn't

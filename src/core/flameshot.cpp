@@ -175,6 +175,38 @@ void Flameshot::screen(CaptureRequest req, const int screenNumber)
     }
 }
 
+CaptureWidget* Flameshot::image(CaptureRequest req)
+{
+    if (!resolveAnyConfigErrors()) {
+        emit captureFailed();
+        return nullptr;
+    }
+
+    QPixmap p(req.data().toString());
+    if (p.isNull()) {
+        AbstractLogger::info() << "Invalid path: " + req.data().toString();
+        abort();
+    }
+
+    QRect geometry = p.rect();
+    QRect region = req.initialSelection();
+    if (region.isNull()) {
+        region = geometry;
+    } else {
+        QRect screenGeom = geometry;
+        screenGeom.moveTopLeft({ 0, 0 });
+        region = region.intersected(screenGeom);
+        p = p.copy(region);
+    }
+    if (req.tasks() & CaptureRequest::PIN) {
+        // change geometry for pin task
+        req.addPinTask(region);
+    }
+    m_captureWindow = new CaptureWidget(req, false, nullptr, &p);
+    m_captureWindow->showFullScreen();
+    return m_captureWindow;
+}
+
 void Flameshot::full(const CaptureRequest& req)
 {
     if (!resolveAnyConfigErrors()) {
@@ -325,6 +357,11 @@ void Flameshot::requestCapture(const CaptureRequest& request)
         case CaptureRequest::GRAPHICAL_MODE: {
             QTimer::singleShot(
               request.delay(), this, [this, request]() { gui(request); });
+            break;
+        }
+        case CaptureRequest::IMAGE_MODE: {
+            QTimer::singleShot(
+              request.delay(), this, [this, request]() { image(request); });
             break;
         }
         default:

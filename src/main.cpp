@@ -164,6 +164,9 @@ int main(int argc, char* argv[])
     CommandArgument guiArgument(
       QStringLiteral("gui"),
       QObject::tr("Start a manual capture in GUI mode."));
+    CommandArgument imageArgument(
+      QStringLiteral("image"),
+      QObject::tr("Start a bounding box capture in image mode."));
     CommandArgument configArgument(QStringLiteral("config"),
                                    QObject::tr("Configure") + " flameshot.");
     CommandArgument screenArgument(QStringLiteral("screen"),
@@ -293,6 +296,7 @@ int main(int argc, char* argv[])
 
     // Relationships
     parser.AddArgument(guiArgument);
+    parser.AddArgument(imageArgument);
     parser.AddArgument(screenArgument);
     parser.AddArgument(fullArgument);
     parser.AddArgument(launcherArgument);
@@ -310,6 +314,7 @@ int main(int argc, char* argv[])
                         pinOption,
                         acceptOnSelectOption },
                       guiArgument);
+    parser.AddOptions({ pathOption }, imageArgument);
     parser.AddOptions({ screenNumberOption,
                         clipboardOption,
                         pathOption,
@@ -349,6 +354,18 @@ int main(int argc, char* argv[])
         Flameshot* flameshot = Flameshot::instance();
         flameshot->launcher();
         qApp->exec();
+    } else if (parser.isSet(imageArgument)) { // IMAGE
+        delete qApp;
+        new QApplication(argc, argv);
+        QString path = parser.value(pathOption);
+        if (path.isEmpty()) {
+            AbstractLogger::error() << "Invalid path";
+            abort();
+        }
+        CaptureRequest req(CaptureRequest::IMAGE_MODE, 0, path);
+        AbstractLogger::info() << path;
+        req.addTask(CaptureRequest::COPY);
+        requestCaptureAndWait(req);
     } else if (parser.isSet(guiArgument)) { // GUI
         delete qApp;
         new QApplication(argc, argv);
