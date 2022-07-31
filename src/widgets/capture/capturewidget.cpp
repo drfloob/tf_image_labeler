@@ -409,6 +409,11 @@ void CaptureWidget::showxywh(bool show)
     }
 }
 
+CSVCoords& CaptureWidget::csv()
+{
+    return m_csv;
+}
+
 void CaptureWidget::initHelpMessage()
 {
     QList<QPair<QString, QString>> keyMap;
@@ -550,22 +555,23 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
         QRect xybox;
         QFontMetrics fm = painter.fontMetrics();
 
-        QString xy =
-          QString("HORK! %1x%2+%3+%4\n(%5%,%6%)->(%7%,%8%) [%9,%10]")
-            .arg(static_cast<int>(selection.width() * scale))
-            .arg(static_cast<int>(selection.height() * scale))
-            .arg(static_cast<int>(selection.left() * scale))
-            .arg(static_cast<int>(selection.top() * scale))
-            //    .arg(selection.left())
-            //    .arg(selection.top())
-            //    .arg(selection.right())
-            //    .arg(selection.bottom())
-            .arg(selection.left() * 100.0 / painter.window().width())
-            .arg(selection.top() * 100.0 / painter.window().height())
-            .arg(selection.right() * 100.0 / painter.window().width())
-            .arg(selection.bottom() * 100.0 / painter.window().height())
-            .arg(painter.window().width())
-            .arg(painter.window().height());
+        m_csv = CSVCoords{
+            .left = selection.left() * 1.0 / painter.window().width(),
+            .top = selection.top() * 1.0 / painter.window().height(),
+            .right = selection.right() * 1.0 / painter.window().width(),
+            .bottom = selection.bottom() * 1.0 / painter.window().height()
+        };
+        QString xy = QString("HORK! %1x%2+%3+%4\n(%5%,%6%)->(%7%,%8%) [%9,%10]")
+                       .arg(static_cast<int>(selection.width() * scale))
+                       .arg(static_cast<int>(selection.height() * scale))
+                       .arg(static_cast<int>(selection.left() * scale))
+                       .arg(static_cast<int>(selection.top() * scale))
+                       .arg(m_csv.left * 100)
+                       .arg(m_csv.top * 100)
+                       .arg(m_csv.right * 100)
+                       .arg(m_csv.bottom * 100)
+                       .arg(painter.window().width())
+                       .arg(painter.window().height());
 
         xybox = fm.boundingRect(xy);
         // the small numbers here are just margins so the text doesn't
@@ -1876,7 +1882,8 @@ void CaptureWidget::drawErrorMessage(const QString& msg, QPainter* painter)
     }
 }
 
-void CaptureWidget::drawInactiveRegion(QPainter* painter, const QRegion& text_region)
+void CaptureWidget::drawInactiveRegion(QPainter* painter,
+                                       const QRegion& text_region)
 {
     QColor overlayColor(0, 0, 0, m_opacity);
     painter->setBrush(overlayColor);

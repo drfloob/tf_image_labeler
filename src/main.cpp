@@ -365,6 +365,7 @@ int main(int argc, char* argv[])
         CaptureRequest req(CaptureRequest::IMAGE_MODE, 0, path);
         AbstractLogger::info() << path;
         req.addTask(CaptureRequest::COPY);
+        req.addTask(CaptureRequest::CSV);
         requestCaptureAndWait(req);
     } else if (parser.isSet(guiArgument)) { // GUI
         delete qApp;

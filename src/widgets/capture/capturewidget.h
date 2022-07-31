@@ -41,6 +41,16 @@ class UpdateNotificationWidget;
 class UtilityPanel;
 class SidePanelWidget;
 
+// Values in percentages of image size.
+// Range: [0,1]
+struct CSVCoords
+{
+    double left;
+    double top;
+    double right;
+    double bottom;
+};
+
 class CaptureWidget : public QWidget
 {
     Q_OBJECT
@@ -92,6 +102,7 @@ private slots:
 public:
     void removeToolObject(int index = -1);
     void showxywh(bool show = true);
+    CSVCoords& csv();
 
 protected:
     void paintEvent(QPaintEvent* paintEvent) override;
@@ -215,4 +226,5 @@ private:
     // For start moving after more than X offset
     QPoint m_startMovePos;
     bool m_startMove;
+    CSVCoords m_csv;
 };

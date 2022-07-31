@@ -409,6 +409,19 @@ void Flameshot::exportCapture(QPixmap capture,
         FlameshotDaemon::copyToClipboard(capture);
     }
 
+    if (tasks & CR::CSV) {
+        auto csv_coords = m_captureWindow->csv();
+        QString csv = QString("UNASSIGNED,%1,%2,%3,%4,,,%5,%6")
+                        .arg(req.data().toString())
+                        .arg("label")
+                        .arg(csv_coords.left)
+                        .arg(csv_coords.top)
+                        .arg(csv_coords.right)
+                        .arg(csv_coords.bottom);
+        QTextStream(stdout) << csv;
+        FlameshotDaemon::copyToClipboard(csv, "CSV copied to clipboard");
+    }
+
     if (tasks & CR::PIN) {
         FlameshotDaemon::createPin(capture, selection);
         if (mode == CR::SCREEN_MODE || mode == CR::FULLSCREEN_MODE) {
