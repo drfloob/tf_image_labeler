@@ -543,33 +543,35 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
         save = true;
     }
     painter.drawPixmap(0, 0, m_context.screenshot);
+    QRegion show_region;
     if (position != GeneralConf::xywh_none && m_selection && m_xywhDisplay) {
         const QRect& selection = m_selection->geometry().normalized();
         const qreal scale = m_context.screenshot.devicePixelRatio();
         QRect xybox;
         QFontMetrics fm = painter.fontMetrics();
 
-        QString xy = QString("HORK! %1x%2+%3+%4\n(%5%,%6%)->(%7%,%8%) [%9,%10]")
-                       .arg(static_cast<int>(selection.width() * scale))
-                       .arg(static_cast<int>(selection.height() * scale))
-                       .arg(static_cast<int>(selection.left() * scale))
-                       .arg(static_cast<int>(selection.top() * scale))
-                    //    .arg(selection.left())
-                    //    .arg(selection.top())
-                    //    .arg(selection.right())
-                    //    .arg(selection.bottom())
-                       .arg(selection.left() * 100.0 / painter.window().width())
-                       .arg(selection.top() * 100.0 / painter.window().height())
-                       .arg(selection.right() * 100.0 / painter.window().width())
-                       .arg(selection.bottom() * 100.0 / painter.window().height())
-                       .arg(painter.window().width())
-                       .arg(painter.window().height());
+        QString xy =
+          QString("HORK! %1x%2+%3+%4\n(%5%,%6%)->(%7%,%8%) [%9,%10]")
+            .arg(static_cast<int>(selection.width() * scale))
+            .arg(static_cast<int>(selection.height() * scale))
+            .arg(static_cast<int>(selection.left() * scale))
+            .arg(static_cast<int>(selection.top() * scale))
+            //    .arg(selection.left())
+            //    .arg(selection.top())
+            //    .arg(selection.right())
+            //    .arg(selection.bottom())
+            .arg(selection.left() * 100.0 / painter.window().width())
+            .arg(selection.top() * 100.0 / painter.window().height())
+            .arg(selection.right() * 100.0 / painter.window().width())
+            .arg(selection.bottom() * 100.0 / painter.window().height())
+            .arg(painter.window().width())
+            .arg(painter.window().height());
 
         xybox = fm.boundingRect(xy);
         // the small numbers here are just margins so the text doesn't
         // smack right up to the box; they aren't critical and the box
         // size itself is tied to the font metrics
-        xybox.adjust(0, 0, 26, 26);
+        xybox.adjust(0, 0, 10, 26);
         // in anticipation of making the position adjustable
         int x0, y0;
         // Move these to header
@@ -581,7 +583,14 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
         if (xybox.height() > selection.height())
             xybox.setHeight(selection.height());
 #endif
+        position = GeneralConf::xywh_true_bottom;
         switch (position) {
+            case GeneralConf::xywh_true_bottom:
+                x0 = painter.window().width() / 2.0 - xybox.width() / 2.0;
+                y0 = painter.window().height() - 50;
+                // AbstractLogger::info() << QString::number(x0) <<
+                // QString::number(y0);
+                break;
             case GeneralConf::xywh_top_left:
                 x0 = selection.left();
                 y0 = selection.top();
@@ -607,16 +616,12 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
 
         QColor uicolor = ConfigHandler().uiColor();
         uicolor.setAlpha(200);
-        painter.fillRect(
-          x0, y0, xybox.width(), xybox.height(), QBrush(uicolor));
+        QRect text_rec{ x0, y0, xybox.width(), xybox.height() };
+        show_region = QRegion(text_rec);
+        painter.fillRect(text_rec, QBrush(uicolor));
         painter.setPen(ColorUtils::colorIsDark(uicolor) ? Qt::white
                                                         : Qt::black);
-        painter.drawText(x0,
-                         y0,
-                         xybox.width(),
-                         xybox.height(),
-                         Qt::AlignVCenter | Qt::AlignHCenter,
-                         xy);
+        painter.drawText(text_rec, Qt::AlignCenter, xy);
     }
 
     if (m_activeTool && m_mouseIsClicked) {
@@ -628,7 +633,7 @@ void CaptureWidget::paintEvent(QPaintEvent* paintEvent)
     if (save)
         painter.restore();
     // draw inactive region
-    drawInactiveRegion(&painter);
+    drawInactiveRegion(&painter, show_region);
 
     if (!isActiveWindow()) {
         drawErrorMessage(
@@ -1871,7 +1876,7 @@ void CaptureWidget::drawErrorMessage(const QString& msg, QPainter* painter)
     }
 }
 
-void CaptureWidget::drawInactiveRegion(QPainter* painter)
+void CaptureWidget::drawInactiveRegion(QPainter* painter, const QRegion& text_region)
 {
     QColor overlayColor(0, 0, 0, m_opacity);
     painter->setBrush(overlayColor);
@@ -1881,6 +1886,7 @@ void CaptureWidget::drawInactiveRegion(QPainter* painter)
     }
     QRegion grey(rect());
     grey = grey.subtracted(r);
+    grey = grey.subtracted(text_region);
 
     painter->setClipRegion(grey);
     painter->drawRect(-1, -1, rect().width() + 1, rect().height() + 1);

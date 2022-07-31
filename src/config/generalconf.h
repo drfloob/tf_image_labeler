@@ -26,7 +26,8 @@ public:
         xywh_bottom_left = 2,
         xywh_top_right = 3,
         xywh_bottom_right = 4,
-        xywh_center = 5
+        xywh_center = 5,
+        xywh_true_bottom = 6
     };
 
 public slots:
