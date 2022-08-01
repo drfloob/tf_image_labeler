@@ -17,4 +17,6 @@ $ tf_labeler image -l arst -p /home/me/proj/test_images/maxresdefault.jpg
 UNASSIGNED,/home/me/proj/test_images/maxresdefault.jpg,arst,0.728125,0.259722,,,0.948438,0.475
 ```
 
+![image](https://raw.githubusercontent.com/drfloob/tf_image_labeler/tf-image-labeler/data/img/preview/animatedUsage.gif)
+
 Forked from flameshot-org/flameshot
